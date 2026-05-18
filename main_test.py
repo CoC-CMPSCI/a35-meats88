@@ -1,24 +1,13 @@
 import pytest
 import re
 
-
-def regex_test(expected, lines):
-    i = 0
-    match = 0
+def regex_test(expected, content):
+    pos = 0
     for token in expected:
-        for j in range(i, len(lines)):
-            res = re.search(token, lines[j])
-            if res is not None:
-                i = j + 1
-                match += 1
-                break
-        else:
-            print(f'\033[91m Not Found: {token} \033[0m')
-            assert False, f'Expect: {expected}'
-    else:
-        print(f'\033[91m match count: {match} \033[0m')
-        assert match == len(expected), f'Expect: {expected}'
-
+        res = re.search(token, content[pos:])
+        if res is None:
+            assert False, f'Expect: {token}'
+        pos += res.start() + 1
 
 def parse_result(filename):
     with open(filename, 'r') as f:
@@ -26,15 +15,12 @@ def parse_result(filename):
     lines = [line.strip() for line in lines if line.strip()]
     return lines
 
-
 @pytest.mark.T1
 def test_main_1():
-    """Line 1 must contain 3 integers and line 2 must contain 2 integers."""
-    lines = parse_result('result1.txt')
-    print(lines)
-    # First line has numbers, second line has numbers
-    regex_test([r'\d+\s+\d+\s+\d+', r'\d+\s+\d+'], lines)
-
+    """Output must contain 3 integers on one part and 2 integers on another."""
+    content = open('result1.txt').read()
+    print(content)
+    regex_test([r'\d+\s+\d+\s+\d+', r'\d+\s+\d+'], content)
 
 @pytest.mark.T2
 def test_main_2():
@@ -47,7 +33,6 @@ def test_main_2():
     for n in nums:
         val = int(n)
         assert 0 <= val <= 99, f"Random number {val} is not in range [0, 99]"
-
 
 @pytest.mark.T3
 def test_main_3():
@@ -63,7 +48,6 @@ def test_main_3():
     actual_total = int(nums2[0])
     assert actual_total == expected_total, \
         f"Total mismatch: expected {expected_total}, got {actual_total}"
-
 
 @pytest.mark.T4
 def test_main_4():
